@@ -1,35 +1,9 @@
 
-import { Box, Button, Text, TextField, Image } from '@skynexui/components';
-import appConfig from '../config.json';
+import { Box, Button, Text, TextField, Image } from '@skynexui/components'
+import appConfig from '../config.json'
+import { useState } from 'react'
+import { useRouter } from 'next/router'
 
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: 'Open Sans', sans-serif;
-      }
-      /* App fit Height */ 
-      html, body, #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */ 
-    `}</style>
-  );
-}
 
 function Titulo(props) {
   const Tag = props.tag || 'h1';
@@ -48,11 +22,12 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-  const username = 'peas';
+  const [username, setUsername] = useState('peas');
+  const roteamento = useRouter()
+  const imgpadrao = 'https://github.com/peas.png'
 
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -60,7 +35,7 @@ export default function PaginaInicial() {
           backgroundImage: 'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
           backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
         }}
-      >
+      >        
         <Box
           styleSheet={{
             display: 'flex',
@@ -78,6 +53,10 @@ export default function PaginaInicial() {
         >
           {/* Formulário */}
           <Box
+            onSubmit={(e)=>{
+              e.preventDefault()
+              roteamento.push('/chat')
+            }}
             as="form"
             styleSheet={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -89,7 +68,9 @@ export default function PaginaInicial() {
               {appConfig.name}
             </Text>
 
-            <TextField
+            <TextField value={username} onChange={(event) => {
+                setUsername(event.target.value)
+            }}
               fullWidth
               textFieldColors={{
                 neutral: {
@@ -101,6 +82,7 @@ export default function PaginaInicial() {
               }}
             />
             <Button
+              disabled={username.length < 2}
               type='submit'
               label='Entrar'
               fullWidth
@@ -136,7 +118,7 @@ export default function PaginaInicial() {
                 borderRadius: '50%',
                 marginBottom: '16px',
               }}
-              src={`https://github.com/${username}.png`}
+              src={username.length > 2 ? `https://github.com/${username}.png`: imgpadrao}
             />
             <Text
               variant="body4"
