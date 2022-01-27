@@ -15,7 +15,7 @@ function Titulo(props) {
                 color: ${appConfig.theme.colors.neutrals['000']};
                 font-size: 24px;
                 font-weight: 600;
-            }
+              }
             `}</style>
     </>
   );
@@ -72,6 +72,7 @@ export default function PaginaInicial() {
                 setUsername(event.target.value)
             }}
               fullWidth
+              placeholder='Digite seu usuário do Github'
               textFieldColors={{
                 neutral: {
                   textColor: appConfig.theme.colors.neutrals[200],
