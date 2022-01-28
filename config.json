@@ -1,5 +1,5 @@
 {
-    "name": "Aluracord - Matrix",
+    "name": "Aluracord",
     "stickers": [
       "http://2.bp.blogspot.com/-d21tffsTIQo/U_H9QjC69gI/AAAAAAAAKqM/wnvOyUr6a_I/s1600/Pikachu%2B2.gif",
       "https://media1.giphy.com/media/BdghqxNFV4efm/200.gif",
@@ -20,10 +20,10 @@
           "600": "#2F8132",
           "700": "#207227",
           "800": "#0E5814",
-          "900": "#05400A"
+          "900": "#801460"
         },
         "neutrals": {
-          "000": "#FFFFFF",
+          "000": "#c4bcbc",
           "050": "#F5F7FA",
           "100": "#E4E7EB",
           "200": "#CBD2D9",
@@ -35,7 +35,19 @@
           "800": "#181F25",
           "900": "#101418",
           "999": "#080A0C"
-        }
+        },
+        "custom":{
+          "000":"#000100",
+          "100":"#61143e",
+          "200":"#a81162",
+          "250":"#5e044e",
+          "300":"#e4318d",
+          "400":"#c565ad",
+          "500":"#fe2fe1",
+          "600":"#160040",
+          "700":"#f52f60",
+          "800":"#0d2444",
+          "900":"#d9e4de"}
       }
     }
   }

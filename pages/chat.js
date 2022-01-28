@@ -1,35 +1,66 @@
 import { Box, Text, TextField, Image, Button, Icon } from "@skynexui/components";
-import { React, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { React, useState, useEffect } from "react";
 import appConfig from "../config.json";
+import { Grid } from "react-loading-icons";
+
+
+
+const supabaseClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_API_KEY)
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+      supabaseClient.from('mensagens')
+     .select('*')
+     .order('created_at', {ascending: false})
+     .then(({data})=>{
+       setMessageList(data)
+       console.log('first', data);
+       setTimeout(()=>{
+         setIsLoading(false)
+       },900)
+     })
+  }, []);
+
+  
 
   function handleNewMessage(newMessage) {
     const messageobj = {
       textmessage: newMessage,
       from: "vanessa",
-      id: messageList.length + 1,
     };
-    setMessageList([messageobj, ...messageList]);
+    supabaseClient.from("mensagens")
+    .insert([
+      messageobj
+    ])
+    .then(({data})=>{
+      setMessageList([data[0], ...messageList]);
+      
+    })
+
     setMessage("");
   }
 
   return (
+    <>
     <Box
       styleSheet={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: appConfig.theme.colors.primary[500],
-        backgroundImage: `url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)`,
+        backgroundColor: appConfig.theme.colors.neutrals["000"],
+        backgroundImage: `url(/background.jpg)`,
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
         backgroundBlendMode: "multiply",
+        backgroundPosition: "center",
         color: appConfig.theme.colors.neutrals["000"],
       }}
-    >
+    > {isLoading ? <Grid stroke="#4f7a9d" fill="#4f7a9d"/> :
       <Box
         styleSheet={{
           display: "flex",
@@ -42,6 +73,7 @@ export default function ChatPage() {
           maxWidth: "95%",
           maxHeight: "95vh",
           padding: "32px",
+          opacity: "0.97",
         }}
       >
         <Header />
@@ -57,7 +89,7 @@ export default function ChatPage() {
             padding: "16px",
           }}
         >
-          <MessageList currentList={messageList} setMessageList={setMessageList}/>
+          <MessageList currentList={messageList} setMessageList={setMessageList} isLoading={isLoading} />
 
           <Box
             as="form"
@@ -102,6 +134,12 @@ export default function ChatPage() {
               onClick={()=>{
                 handleNewMessage(message)
               }}
+              buttonColors={{
+                contrastColor: appConfig.theme.colors.neutrals["000"],
+                mainColor: appConfig.theme.colors.custom[250],
+                mainColorLight: appConfig.theme.colors.custom[200],
+                mainColorStrong: appConfig.theme.colors.custom[200],
+              }}
               styleSheet={{ 
                 width:{
                  xs: "100%", 
@@ -113,8 +151,9 @@ export default function ChatPage() {
               />
           </Box>
         </Box>
-      </Box>
+      </Box>}
     </Box>
+    </>
   );
 }
 
@@ -132,23 +171,30 @@ function Header() {
       >
         <Text variant="heading5">Chat</Text>
         <Button
-          variant="tertiary"
-          colorVariant="neutral"
           label="Logout"
           href="/"
+          buttonColors={{
+            contrastColor: appConfig.theme.colors.neutrals["000"],
+            mainColorStrong: appConfig.theme.colors.custom[800]
+          }}
         />
       </Box>
     </>
   );
 }
 
-function MessageList({ currentList, setMessageList }) {
+function MessageList({ currentList, setMessageList, isLoading}) {
 
 
   function handleRemove(e,id) {
     e.preventDefault()
     const newMessageList = currentList.filter(message => message.id !== id)
-    setMessageList(newMessageList)
+    supabaseClient.from('mensagens')
+    .delete()
+    .match({'id': id })
+    .then(()=>{
+      setMessageList(newMessageList)
+    })
   }
   
 
@@ -177,6 +223,8 @@ function MessageList({ currentList, setMessageList }) {
                 backgroundColor: appConfig.theme.colors.neutrals[700],
                 
               },
+              fontWeight: "600",
+              color: appConfig.theme.colors.neutrals[300]
             }}
           >
             <Box 
@@ -190,6 +238,9 @@ function MessageList({ currentList, setMessageList }) {
               <Box
                 styleSheet={{
                   marginBottom: "8px",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center"
                 }}
               >
                 <Image
@@ -214,7 +265,7 @@ function MessageList({ currentList, setMessageList }) {
                   }}
                   tag="span"
                 >
-                  {new Date().toLocaleDateString()}
+                  {new Date().toLocaleDateString("pt-BR")}
                 </Text>
               </Box>
               <Icon
@@ -230,7 +281,7 @@ function MessageList({ currentList, setMessageList }) {
             {msg.textmessage}
           </Text>
         );
-      })}
+      })}     
     </Box>
   );
 }
