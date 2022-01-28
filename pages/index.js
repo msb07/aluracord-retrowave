@@ -20,9 +20,9 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-  const [username, setUsername] = useState("peas");
+  const [username, setUsername] = useState("");
   const roteamento = useRouter();
-  const imgpadrao = "https://github.com/peas.png";
+  const imgpadrao = "https://github.com/github.png";
 
   return (
     <>
@@ -154,7 +154,7 @@ export default function PaginaInicial() {
                 borderRadius: "1000px",
               }}
             >
-              {username}
+              {username === '' ? 'Digite seu Github' : username}
             </Text>
           </Box>
           {/* Photo Area */}
