@@ -63,7 +63,7 @@ export default function PaginaInicial() {
           <Box
             onSubmit={(e) => {
               e.preventDefault();
-              roteamento.push("/chat");
+              roteamento.push(`/chat?username=${username}`);
             }}
             as="form"
             styleSheet={{
@@ -76,7 +76,7 @@ export default function PaginaInicial() {
               marginBottom: "32px",
             }}
           >
-            <Titulo tag="h2">Bem vindo de volta!</Titulo>
+            <Titulo tag="h2" >Bem vindo de volta!</Titulo>
             <Text
               variant="body3"
               styleSheet={{

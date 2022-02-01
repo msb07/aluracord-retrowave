@@ -10,17 +10,36 @@ import { createClient } from "@supabase/supabase-js";
 import { React, useState, useEffect } from "react";
 import appConfig from "../config.json";
 import { Grid } from "react-loading-icons";
+import { useRouter } from "next/router"
+import { ButtonSendSticker } from "../src/components/ButtonSendStickers";
 
 const supabaseClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_API_KEY
 );
 
+// Função para escutar os eventos de mesagem iserida e deletada no supabase 
+function messageListener (messageToModify){ 
+  return supabaseClient.from('mensagens').on('*',(liveresponse) =>{
+    if (liveresponse.eventType === 'INSERT'){
+      messageToModify('INSERT', liveresponse.new)
+    } else if(liveresponse.eventType === 'DELETE'){
+      messageToModify('DELETE', liveresponse.old)
+    }
+  })
+  .subscribe()
+}
+
+
 export default function ChatPage() {
   const [message, setMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const roteamento = useRouter();
+  const logedUser = roteamento.query.username
 
+  
+  // useEffect usado somente quando a página carrega
   useEffect(() => {
     supabaseClient
       .from("mensagens")
@@ -28,23 +47,44 @@ export default function ChatPage() {
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setMessageList(data);
-        console.log("first", data);
         setTimeout(() => {
           setIsLoading(false);
         }, 900);
       });
+      const subscrciption = messageListener((eventType, msg) => {
+        if (eventType === 'INSERT'){
+          setMessageList((actualListValue) => {
+            return [
+              msg,
+              ...actualListValue
+            ]
+          })
+        } else if (eventType === 'DELETE') {
+          setMessageList((actualListValue) => {
+            return (
+              actualListValue.filter((msgSelected)=> {
+                return msgSelected.id != msg.id
+              })
+            )
+          })
+        }
+        
+      })
+      return () => {
+        subscrciption.unsubscribe()
+      }
   }, []);
+  
 
   function handleNewMessage(newMessage) {
     const messageobj = {
       textmessage: newMessage,
-      from: "vanessa",
+      from: logedUser,
     };
     supabaseClient
       .from("mensagens")
       .insert([messageobj])
       .then(({ data }) => {
-        setMessageList([data[0], ...messageList]);
       });
 
     setMessage("");
@@ -142,6 +182,11 @@ export default function ChatPage() {
                     color: appConfig.theme.colors.neutrals[200],
                   }}
                 />
+                <ButtonSendSticker
+                onStickerClick={(sticker)=>{
+                  handleNewMessage(':sticker: ' + sticker)
+                }}
+                 />
                 <Button
                   label="Enviar"
                   onClick={() => {
@@ -195,7 +240,7 @@ function Header() {
   );
 }
 
-function MessageList({ currentList, setMessageList, isLoading }) {
+function MessageList({ currentList, setMessageList }) {
   function handleRemove(e, id) {
     e.preventDefault();
     const newMessageList = currentList.filter((message) => message.id !== id);
@@ -262,7 +307,7 @@ function MessageList({ currentList, setMessageList, isLoading }) {
                       display: "inline-block",
                     },
                   }}
-                  src={`https://github.com/vanessametonini.png`}
+                  src={`https://github.com/${msg.from}.png`}
                 />
                 <Text tag="strong">{msg.from}</Text>
                 <Text
@@ -289,7 +334,15 @@ function MessageList({ currentList, setMessageList, isLoading }) {
                 }}
               />
             </Box>
-            {msg.textmessage}
+            {msg.textmessage.startsWith(':sticker:')
+             ? (
+                <Image src={msg.textmessage.replace(':sticker:','')} /> 
+             )
+             : (
+                msg.textmessage
+              )
+            }
+             
           </Text>
         );
       })}
